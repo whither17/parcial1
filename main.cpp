@@ -142,6 +142,38 @@ char *patron3() {
     return patron;
 }
 
+char *patron4() {
+    char *patron = new char[8];
+    char binario = 0b00000000;
+    int desplazamiento = 4;
+    int l = 1;
+
+    for(int fila = 0; fila < 8; fila++) {
+        if(fila < 4) {
+            binario = 0b00000000;
+            binario = binario | 0b1111;
+            for(int i = 0; i < desplazamiento; i++) {
+                binario = binario << 1;
+            }
+            desplazamiento--;
+            patron[fila] = ~binario;
+        }
+        else {
+            patron[fila] = patron[fila - l];
+            l = l + 2;
+        }
+    }
+    return patron;
+}
+
+char *patron0() {
+    char *patron = new char[8];
+    for(int i = 0; i < 8; i++) {
+        patron[i] = 0b00000000;
+    }
+    return patron;
+}
+
 void borrarPatron(char *ptr) {
     delete []ptr;
 
@@ -149,7 +181,11 @@ void borrarPatron(char *ptr) {
 int main() {
 
     char *ptr;
-    ptr = patron3();
 
+    ptr = patron4();
+
+    for(int i = 0; i < 8; i++) {
+        cout << *(ptr + i) << endl;
+    }
 
 }
