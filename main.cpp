@@ -176,7 +176,6 @@ char *patron0() {
 
 void borrarPatron(char *ptr) {
     delete []ptr;
-
 }
 int main() {
 
@@ -189,3 +188,5 @@ int main() {
     }
 
 }
+
+
