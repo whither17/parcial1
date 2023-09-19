@@ -1,30 +1,19 @@
-#include <iostream>
-using namespace std;
 #define latch 3 //Cable verde
 #define clock 2 //Cable azul
 #define datos 5 //Cable amarillo
+String mensaje0 = "1 - Verificar matriz, 2 - Ingresar una figura, 3 - Secuencia predefinida";
+String mensaje1 = "Ingrese una opcion: ";
+String mensaje2 = "Opcion ingresada: ";
+int opcion = 0;
+char matrizFil[] = {128,64,32,16,8, 4, 2, 1};
+char colOff = 255;
 
-
-
-/*
 void dibujar(char *fila, char *columna) {
-    shiftOut(datos,clock,MSBFIRST,fila);  //catodos largo - columnas, estos funcionan inverso, para que el led se encienda debe ser 0 y no 1
-    shiftOut(datos,clock,MSBFIRST,columna); //Anodos altura - filas
+    shiftOut(datos,clock,LSBFIRST,*columna);  //catodos largo - columnas, estos funcionan inverso, para que el led se encienda debe ser 0 y no 1
+    shiftOut(datos,clock,MSBFIRST,*fila); //Anodos altura - filas
     digitalWrite(latch,HIGH);
     digitalWrite(latch,LOW);
-}
-
-void setup() {
-
-    Serial.begin(9600);
-    pinMode(latch,OUTPUT);
-    pinMode(clock,OUTPUT);
-    pinMode(datos,OUTPUT);
-}
-*/
-
-void loop() {
-
+    //delay(500);
 }
 
 char *patron1(){
@@ -177,6 +166,109 @@ char *patron0() {
 void borrarPatron(char *ptr) {
     delete []ptr;
 }
+
+void dibujarPrueba(int tiempo, int rep) {
+
+    unsigned long punto1, punto2, punto3, punto4;
+    int i = 0;
+    char *col;
+    col = patron4();
+
+    while(i < rep) {
+        punto1 = millis();
+        punto2 = millis();
+        Serial.print("Al arrancar: ");
+        Serial.println(punto1);
+        while((punto2 - punto1) <= 2*tiempo) {
+            punto2 = millis();
+            Serial.print("T transcurrido: ");
+            Serial.println(punto2);
+            while(true){
+                punto3 = millis();
+                if ((punto3 - punto2) <= tiempo) {
+                    for(int i = 0; i < 8; i++) {
+                        dibujar(&matrizFil[i], &col[i]);
+                    }
+                }
+                else{
+                    break;
+                }
+            }
+
+            while(true){
+                punto4 = millis();
+                if ((punto4 - punto3) <= tiempo) {
+                    dibujar(&matrizFil[0], &colOff);
+                }
+                else{
+                    break;
+                }
+            }
+
+        }
+        i++;
+        Serial.print("veces: ");
+        Serial.println(i);
+    }
+}
+
+void verificacion() {
+    unsigned int tiempo, repeticiones;
+    while(true) {
+        Serial.println("Ingrese el tiempo de retardo (en segundos): ");
+        while(Serial.available() == 0){}
+        tiempo = Serial.parseInt();
+        Serial.print("Tiempo elegido (s): ");
+        Serial.println(tiempo);
+
+        Serial.println("Ingrese la cantidad de repeticiones (veces): ");
+        while(Serial.available() == 0){}
+        repeticiones = Serial.parseInt();
+        Serial.print("Rep: ");
+        Serial.println(repeticiones);
+
+        if((repeticiones > 0) && (tiempo > 0)) {
+            break;
+        }
+        else {
+            Serial.println("Valores Incorrectos");
+        }
+    }
+
+    dibujarPrueba((tiempo*1000), repeticiones);
+}
+
+
+void setup() {
+
+    Serial.begin(9600);
+    pinMode(latch,OUTPUT);
+    pinMode(clock,OUTPUT);
+    pinMode(datos,OUTPUT);
+}
+
+void loop() {
+    Serial.println(mensaje0);
+    while(Serial.available() == 0){}
+    opcion = Serial.parseInt();
+    Serial.print(mensaje2);
+    Serial.println(opcion);
+
+    switch(opcion) {
+    case 1:
+        verificacion();
+        break;
+    case 2:
+        break;
+    case 3:
+        break;
+    default:
+        Serial.println("Valor incorrecto, intente otra vez");
+    }
+
+}
+
+
 int main() {
 
     char *ptr;
