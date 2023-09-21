@@ -1,25 +1,57 @@
 #define latch 3 //Cable verde
 #define clock 2 //Cable azul
 #define datos 5 //Cable amarillo
+
 String mensaje0 = "1 - Verificar matriz, 2 - Ingresar una figura, 3 - Secuencia predefinida";
 String mensaje1 = "Ingrese una opcion: ";
 String mensaje2 = "Opcion ingresada: ";
 int opcion = 0;
-char matrizFil[] = {128,64,32,16,8, 4, 2, 1};
-char colOff = 255;
+unsigned char matrizFil[] = {128,64,32,16,8, 4, 2, 1, 0};
 
-void dibujar(char *fila, char *columna) {
+void dibujar(unsigned char *fila, unsigned char *columna) {
+
     shiftOut(datos,clock,LSBFIRST,*columna);  //catodos largo - columnas, estos funcionan inverso, para que el led se encienda debe ser 0 y no 1
     shiftOut(datos,clock,MSBFIRST,*fila); //Anodos altura - filas
     digitalWrite(latch,HIGH);
     digitalWrite(latch,LOW);
-    //delay(500);
 }
+/*
+char *patronArbitrario() {
+  unsigned int tiempo;
+  int *linea = new unsigned short[8];
 
-char *patron1(){
+  int i = 0;
 
-    char *patron = new char[8]; //creamos un arreglo dinamico de 8 posiciones tipo char
-    char binario;     // binario será nuestra variable que representará un byte
+  while(true) {
+    Serial.println("Ingrese el tiempo de retardo (en segundos): ");
+    while(Serial.available() == 0){}
+    tiempo = Serial.parseInt();
+    Serial.print("Tiempo elegido (s): ");
+    Serial.println(tiempo);
+
+    if(tiempo > 0) {
+      break;
+    }
+    else {
+      Serial.println("Valores Incorrectos");
+    }
+  }
+
+  while(i < 8) {
+    Serial.println("Ingrese 8 bits: ");
+    while(Serial.available() == 0){}
+    linea = ;   // :(
+    Serial.print("Linea: ");
+    Serial.println(linea);
+    i++;
+  }
+}
+*/
+
+unsigned char *patron1(){
+
+    unsigned char *patron = new unsigned char[8]; //creamos un arreglo dinamico de 8 posiciones tipo char
+    unsigned char binario;     // binario será nuestra variable que representará un byte
     int l = 1;        // l será una variable espejo
     int bandera = 2;  // bandera nos indica cuantos bit 1 debemos generar
     int aumento = 3;  // aumento nos indica cuanto debemos desplazar los bits
@@ -64,9 +96,10 @@ char *patron1(){
     return patron;
 }
 
-char *patron2() {
-    char *patron = new char[8];
-    char binario;
+unsigned char *patron2() {
+
+    unsigned char *patron = new unsigned char[8];
+    unsigned char binario;
     int desplazamiento = 7;                             //cuanto debemos de mover nusestro bit a la izquierda
     int cola = 0;                                       //cuanto debemos de mover nuestros bits a su posicion definitiva
     int l = 1;                                          //variable espejo
@@ -93,9 +126,10 @@ char *patron2() {
     return patron;
 }
 
-char *patron3() {
-    char *patron = new char[8];
-    char binario;
+unsigned char *patron3() {
+
+    unsigned char *patron = new unsigned char[8];
+    unsigned char binario;
     int desplazamiento = 3;
 
     for(int fila = 0; fila < 8; fila = fila + 2) {
@@ -131,9 +165,10 @@ char *patron3() {
     return patron;
 }
 
-char *patron4() {
-    char *patron = new char[8];
-    char binario = 0b00000000;
+unsigned char *patron4() {
+
+    unsigned char *patron = new unsigned char[8];
+    unsigned char binario = 0b00000000;
     int desplazamiento = 4;
     int l = 1;
 
@@ -155,89 +190,179 @@ char *patron4() {
     return patron;
 }
 
-char *patron0() {
-    char *patron = new char[8];
+unsigned char *patron0() {
+    unsigned char *patron = new unsigned char[8];
     for(int i = 0; i < 8; i++) {
         patron[i] = 0b00000000;
     }
     return patron;
 }
 
-void borrarPatron(char *ptr) {
+void borrarPatron(unsigned char *ptr) {
     delete []ptr;
 }
 
 void dibujarPrueba(int tiempo, int rep) {
 
-    unsigned long punto1, punto2, punto3, punto4;
+    unsigned long punto1;
     int i = 0;
-    char *col;
-    col = patron4();
+    unsigned char *col;
+    bool estado = true;
+    col = patron0();
+
+    punto1 = millis();
+    while(i < rep) {
+        if(millis() - punto1 < tiempo) {
+            if(estado){
+                for(int i = 0; i < 8; i++) {
+                    dibujar(&matrizFil[i], &col[i]);
+                }
+            }
+
+        }
+        else {
+            dibujar(&matrizFil[8], &col[0]);
+            estado = !estado;
+            punto1 = millis();
+
+            if(estado) {
+                i++;
+            }
+        }
+    }
+    borrarPatron(col);
+}
+
+void dibujarSecuencia(int tiempo, int rep) {
+
+    unsigned long punto1;
+    unsigned char *pat1, *pat2, *pat3, *pat4;
+    bool estado = true;
+    int i = 0;
+
+    pat1 = patron1();
+    pat2 = patron2();
+    pat3 = patron3();
+    pat4 = patron4();
 
     while(i < rep) {
         punto1 = millis();
-        punto2 = millis();
-        Serial.print("Al arrancar: ");
-        Serial.println(punto1);
-        while((punto2 - punto1) <= 2*tiempo) {
-            punto2 = millis();
-            Serial.print("T transcurrido: ");
-            Serial.println(punto2);
-            while(true){
-                punto3 = millis();
-                if ((punto3 - punto2) <= tiempo) {
-                    for(int i = 0; i < 8; i++) {
-                        dibujar(&matrizFil[i], &col[i]);
-                    }
-                }
-                else{
-                    break;
+        while(true) {
+            if(millis() - punto1 < tiempo) {
+                for(int i = 0; i < 8; i++) {
+                    dibujar(&matrizFil[i], &pat1[i]);
                 }
             }
-
-            while(true){
-                punto4 = millis();
-                if ((punto4 - punto3) <= tiempo) {
-                    dibujar(&matrizFil[0], &colOff);
-                }
-                else{
-                    break;
-                }
+            else {
+                break;
             }
-
         }
-        i++;
-        Serial.print("veces: ");
-        Serial.println(i);
+        punto1 = millis();
+        while(true) {
+            if(millis() - punto1 < tiempo) {
+                for(int i = 0; i < 8; i++) {
+                    dibujar(&matrizFil[i], &pat2[i]);
+                }
+            }
+            else {
+                break;
+            }
+        }
+        punto1 = millis();
+        while(true) {
+            if(millis() - punto1 < tiempo) {
+                for(int i = 0; i < 8; i++) {
+                    dibujar(&matrizFil[i], &pat3[i]);
+                }
+            }
+            else {
+                break;
+            }
+        }
+        punto1 = millis();
+        while(true) {
+            if(millis() - punto1 < tiempo) {
+                for(int i = 0; i < 8; i++) {
+                    dibujar(&matrizFil[i], &pat4[i]);
+                }
+            }
+            else {
+                i++;
+                break;
+            }
+        }
     }
+
+    dibujar(&matrizFil[8], &matrizFil[8]);
+    borrarPatron(pat1);
+    borrarPatron(pat2);
+    borrarPatron(pat3);
+    borrarPatron(pat4);
 }
 
-void verificacion() {
-    unsigned int tiempo, repeticiones;
+unsigned int time() {
+
+    unsigned int t;
+
     while(true) {
         Serial.println("Ingrese el tiempo de retardo (en segundos): ");
         while(Serial.available() == 0){}
-        tiempo = Serial.parseInt();
-        Serial.print("Tiempo elegido (s): ");
-        Serial.println(tiempo);
+        t = Serial.parseInt();
 
-        Serial.println("Ingrese la cantidad de repeticiones (veces): ");
-        while(Serial.available() == 0){}
-        repeticiones = Serial.parseInt();
-        Serial.print("Rep: ");
-        Serial.println(repeticiones);
-
-        if((repeticiones > 0) && (tiempo > 0)) {
+        if(t > 0) {
+            Serial.print("Tiempo elegido (s): ");
+            Serial.println(t);
             break;
         }
         else {
-            Serial.println("Valores Incorrectos");
+            Serial.println("Valor Incorrecto");
         }
-    }
 
-    dibujarPrueba((tiempo*1000), repeticiones);
+    }
+    return t*1000;
 }
 
+unsigned int repeticion() {
+
+    unsigned int r;
+
+    while(true) {
+        Serial.println("Ingrese la cantidad de repeticiones (veces): ");
+        while(Serial.available() == 0){}
+        r = Serial.parseInt();
+
+        if(r > 0) {
+            Serial.print("Rep: ");
+            Serial.println(t);
+            break;
+        }
+        else {
+            Serial.println("Valor Incorrecto");
+        }
+
+    }
+    return r;
+}
+
+void verificacion() {
+
+    unsigned int tiempo, repeticiones;
+
+    tiempo = time();
+    repeticiones = repeticion();
+
+    dibujarPrueba((tiempo), repeticiones);
+}
+
+void secuencia() {
+
+    unsigned int tiempo, repeticiones;
+
+    tiempo = time();
+    repeticiones = repeticion();
+
+    dibujarSecuencia(tiempo, repeticiones);
+}
 
 void setup() {
 
@@ -259,14 +384,17 @@ void loop() {
         verificacion();
         break;
     case 2:
+        //patronArbitrario();
         break;
     case 3:
+        secuencia();
         break;
     default:
         Serial.println("Valor incorrecto, intente otra vez");
     }
-
 }
+
+
 
 
 int main() {
