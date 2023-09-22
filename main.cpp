@@ -17,6 +17,50 @@ void dibujar(unsigned char *fila, unsigned char *columna) {
 
 }
 
+unsigned int time() {
+
+    unsigned int t;
+
+    while(true) {
+        Serial.println("Ingrese el tiempo de retardo (en segundos): ");
+        while(Serial.available() == 0){}
+        t = Serial.parseInt();
+
+        if(t > 0) {
+            Serial.print("Tiempo elegido (s): ");
+            Serial.println(t);
+            break;
+        }
+        else {
+            Serial.println("Valor Incorrecto");
+        }
+    }
+    return t*1000;
+
+}
+
+unsigned int repeticion() {
+
+    unsigned int r;
+
+    while(true) {
+        Serial.println("Ingrese la cantidad de repeticiones (veces): ");
+        while(Serial.available() == 0){}
+        r = Serial.parseInt();
+
+        if(r > 0) {
+            Serial.print("Rep: ");
+            Serial.println(r);
+            break;
+        }
+        else {
+            Serial.println("Valor Incorrecto");
+        }
+    }
+    return r;
+
+}
+
 unsigned char *patron1(){
 
     unsigned char *patron = new unsigned char[8]; //creamos un arreglo dinamico de 8 posiciones tipo char
@@ -172,6 +216,39 @@ unsigned char *patron0() {
 
 }
 
+void  patronUser() {
+
+    unsigned int tiempo, rep, vez = 1;
+    unsigned int *patronCrudo = new unsigned int[8];
+    unsigned char *patron = new unsigned char[8];
+
+    tiempo = time();
+    rep = repeticion();
+    for(int i = 0; i < 8; i++) {
+        while(true) {
+            Serial.print("(");
+            Serial.print(vez);
+            Serial.print(")");
+            Serial.println("Ingrese un numero entre 0 y 255: ");
+            while(Serial.available() == 0){}
+            patronCrudo[i] = Serial.parseInt();
+
+            if((patronCrudo[i] >= 0) && (patronCrudo[i] <= 255)) {
+                vez++;
+                break;
+            }
+            else {
+                Serial.println("Valor Incorrecto");
+            }
+        }
+    }
+    patronArbitrario(patronCrudo, patron);
+    delete []patronCrudo;
+    dibujarEstatico(tiempo, rep, patron);
+    delete []patron;
+
+}
+
 void borrarPatron(unsigned char *ptr) {
     delete []ptr;
 
@@ -179,27 +256,27 @@ void borrarPatron(unsigned char *ptr) {
 
 void dibujarEstatico(int tiempo, int rep, unsigned char *col) {
 
-    unsigned long punto1;
-    int i = 0;
-    bool estado = true;
+    unsigned long punto1;                                   //nuestra variable que tomara una medida del tiempo
+    int ciclo = 0;                                              //Nuestra variable contadora de ciclos
+    bool estado = true;                                     //variable llave de paso
 
-    punto1 = millis();
-    while(i < rep) {
-        if(millis() - punto1 < tiempo) {
-            if(estado){
+    punto1 = millis();                                      //medimos el tiempo antes del ciclo
+    while(ciclo < rep) {
+        if(millis() - punto1 < tiempo) {                    //comprobamos que el tiempo transcurrido es menor que el indicado
+            if(estado){                                     //llave de paso
                 for(int i = 0; i < 8; i++) {
-                    dibujar(&matrizFil[i], &col[i]);
+                    dibujar(&matrizFil[i], &col[i]);        //funcion dibujo
                 }
             }
 
         }
         else {
-            dibujar(&matrizFil[8], &col[0]);
+            dibujar(&matrizFil[8], &col[0]);                //apagar leds
             estado = !estado;
             punto1 = millis();
 
             if(estado) {
-                i++;
+                ciclo++;
             }
         }
     }
@@ -209,20 +286,19 @@ void dibujarEstatico(int tiempo, int rep, unsigned char *col) {
 
 void dibujarSecuencia(int tiempo, int rep) {
 
-    unsigned long punto1;
-    unsigned char *pat1, *pat2, *pat3, *pat4;
-    bool estado = true;
-    int i = 0;
+    unsigned long punto1;                                  //variable de tiempo
+    unsigned char *pat1, *pat2, *pat3, *pat4;              //patrones predefinidos
+    int ciclo = 0;                                         //variable de contol
 
-    pat1 = patron1();
+    pat1 = patron1();                                      //cargamos los patrones
     pat2 = patron2();
     pat3 = patron3();
     pat4 = patron4();
 
-    while(i < rep) {
-        punto1 = millis();
+    while(ciclo < rep) {
+        punto1 = millis();                                 //medimos el tiempo
         while(true) {
-            if(millis() - punto1 < tiempo) {
+            if(millis() - punto1 < tiempo) {               //dibujamos un patron
                 for(int i = 0; i < 8; i++) {
                     dibujar(&matrizFil[i], &pat1[i]);
                 }
@@ -261,61 +337,17 @@ void dibujarSecuencia(int tiempo, int rep) {
                 }
             }
             else {
-                i++;
+                ciclo++;
                 break;
             }
         }
     }
 
-    dibujar(&matrizFil[8], &matrizFil[8]);
-    borrarPatron(pat1);
+    dibujar(&matrizFil[8], &matrizFil[8]);             //limpiamos la matriz
+    borrarPatron(pat1);                                //liberamos la memoria
     borrarPatron(pat2);
     borrarPatron(pat3);
     borrarPatron(pat4);
-
-}
-
-unsigned int time() {
-
-    unsigned int t;
-
-    while(true) {
-        Serial.println("Ingrese el tiempo de retardo (en segundos): ");
-        while(Serial.available() == 0){}
-        t = Serial.parseInt();
-
-        if(t > 0) {
-            Serial.print("Tiempo elegido (s): ");
-            Serial.println(t);
-            break;
-        }
-        else {
-            Serial.println("Valor Incorrecto");
-        }
-    }
-    return t*1000;
-
-}
-
-unsigned int repeticion() {
-
-    unsigned int r;
-
-    while(true) {
-        Serial.println("Ingrese la cantidad de repeticiones (veces): ");
-        while(Serial.available() == 0){}
-        r = Serial.parseInt();
-
-        if(r > 0) {
-            Serial.print("Rep: ");
-            Serial.println(r);
-            break;
-        }
-        else {
-            Serial.println("Valor Incorrecto");
-        }
-    }
-    return r;
 
 }
 
@@ -340,35 +372,7 @@ void patronArbitrario(unsigned int *ptr, unsigned char *ptchar) {
 
 }
 
-void  patronUser() {
 
-    unsigned int tiempo, rep;
-    unsigned int *patronCrudo = new unsigned int[8];
-    unsigned char *patron = new unsigned char[8];
-
-    tiempo = time();
-    rep = repeticion();
-    for(int i = 0; i < 8; i++) {
-        while(true) {
-
-            Serial.println("Ingrese un numero entre 0 y 255: ");
-            while(Serial.available() == 0){}
-            patronCrudo[i] = Serial.parseInt();
-
-            if((patronCrudo[i] >= 0) && (patronCrudo[i] <= 255)) {
-                break;
-            }
-            else {
-                Serial.println("Valor Incorrecto");
-            }
-        }
-    }
-    patronArbitrario(patronCrudo, patron);
-    delete []patronCrudo;
-    dibujarEstatico(tiempo, rep, patron);
-    delete []patron;
-
-}
 
 void secuencia() {
 
@@ -407,8 +411,8 @@ void publik() {
 
 void setup() {
 
-    Serial.begin(9600);
-    pinMode(latch,OUTPUT);
+    Serial.begin(9600);                                          //inicializamos puerto serie
+    pinMode(latch,OUTPUT);                                       //inicializamos los puertos de comunicacion con la matriz
     pinMode(clock,OUTPUT);
     pinMode(datos,OUTPUT);
 
