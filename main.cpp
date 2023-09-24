@@ -5,7 +5,6 @@
 String mensaje0 = "1 - Verificar matriz, 2 - Ingresar una figura, 3 - Secuencia predefinida";
 String mensaje1 = "Ingrese una opcion: ";
 String mensaje2 = "Opcion ingresada: ";
-int opcion = 0;
 unsigned char matrizFil[] = {128, 64, 32, 16, 8, 4, 2, 1, 0}; //Este array es fundamental para el dibujado de barrido
 
 void dibujar(unsigned char *fila, unsigned char *columna) {
@@ -386,7 +385,7 @@ void secuencia() {
 }
 
 void publik() {
-
+    int opcion = 0;
     Serial.println(mensaje0);
     while((Serial.available()) == 0){}
     opcion = Serial.parseInt();
